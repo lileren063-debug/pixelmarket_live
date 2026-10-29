@@ -45,7 +45,7 @@ FEED_LIMIT = int(os.environ.get("FEED_LIMIT", "20"))
 APP_IDS = {a.strip() for a in os.environ.get("APP_ID", "16,2").split(",") if a.strip()}  # boş = tüm oyunlar
 # Forum grubunda her oyunun gittiği konu (topic): oyun no -> konu no.
 # Konu no = konunun linkindeki son sayı (t.me/c/4408043162/<konu no>). Listede yoksa General'e gider.
-TOPICS = {"16": None, "2": None}
+TOPICS = {"16": "5", "2": "8"}  # Pixel world LIVE, VOID LIVE
 for _pair in os.environ.get("TOPICS", "").split(","):  # örn. TOPICS=16:3,2:5
     if ":" in _pair:
         _app, _topic = _pair.split(":", 1)
