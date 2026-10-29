@@ -1,7 +1,7 @@
 # px.market canlı satış botu · kurulum
 
 Bot, px.market'teki yeni satışları her 20 saniyede bir kontrol eder ve Telegram kanalına
-@PixelMarketLIVE tarzında "GAME ITEM SOLD" mesajı olarak (resim, ad #numara, satış fiyatı, "View Item" butonu) gönderir.
+@PixelMarketLIVE tarzında "ITEM SOLD" mesajı olarak (resim, ad #numara, satış fiyatı) gönderir.
 
 ## 1. Telegram tarafı
 1. Telegram'da **@BotFather** → `/newbot` → bir ad ver → sana bir **token** verir. Bu token'ı kimseyle paylaşma, sohbete de yapıştırma.

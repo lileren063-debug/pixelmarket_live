@@ -8,7 +8,6 @@ okur, yeni satışları Telegram kanalına @PixelMarketLIVE tarzında gönderir:
     Illuminati #173
     💰 Pixel Market Price
     0.28 TON
-    [🔍 View Item]
 
 Sadece Python 3.9+ standart kütüphanesi kullanır, pip kurulumu gerekmez.
 
@@ -19,7 +18,6 @@ Ortam değişkenleri (token'ı ASLA koda yazma):
     FEED_LIMIT     her seferde kaç satış çekilir (varsayılan 20)
     APP_ID         sadece bu oyunun satışları, 16 = Pixel World (varsayılan; boş = hepsi)
     MIN_PRICE_TON  bu fiyatın altındaki satışları atla (varsayılan 0)
-    ITEM_URL       View Item linki, {id} = eşya no (varsayılan https://px.market)
     STATE_FILE     görülen satışların tutulduğu dosya (varsayılan state.json)
     POST_OLD       1 ise ilk açılışta akıştaki eski satışları da gönderir
     DRY_RUN        1 ise Telegram'a göndermez, sadece ekrana yazar
@@ -204,41 +202,41 @@ def item_link(ev):
 def build_message(ev):
     name = str(pick(ev, "name") or "Item")
     serial = pick(ev, "serial")
+    collection = pick(ev, "collection")
     price = to_ton(pick(ev, "price"))
-    title = escape(name) + (f" <code>#{escape(str(serial))}</code>" if serial is not None else "")
-    return "\n".join([
-        "🔄 <b>GAME ITEM SOLD</b>",
-        "┌──────────────",
-        f"│ <b>{title}</b>",
-        "├──────────────",
-        "│ 💰 <b>Pixel Market Price</b>",
-        f"│ <code>{fmt_ton(price)} TON</code>",
-        "└──────────────",
-    ])
+    title = f"<b>{escape(name)}</b>" + (f"  <code>#{escape(str(serial))}</code>" if serial is not None else "")
+    lines = ["✅ <b>ITEM SOLD</b>  ·  <i>Pixel World</i>", "", f"<blockquote>{title}"]
+    if collection and str(collection).lower() != name.lower():
+        lines[-1] += f"\n🗂 {escape(str(collection))}"
+    lines[-1] += "</blockquote>"
+    lines.append(f"💰 <b>{fmt_ton(price)} TON</b>")
+    if price >= 100:
+        lines.append("🐳 <i>Whale sale</i>")
+    elif price >= 10:
+        lines.append("🔥 <i>Big sale</i>")
+    return "\n".join(lines)
 
 
 def post(ev, text):
-    keyboard = {"inline_keyboard": [[{"text": "🔍 View Item", "url": item_link(ev)}]]}
     image = pick(ev, "image")
     if DRY_RUN:
         print("-" * 40)
         print(f"[resim] {image}")
-        print(text)
-        print(f"[buton] {item_link(ev)}", flush=True)
+        print(text, flush=True)
         return True
     if image:
         # bazı eşyaların görseli .mp4 animasyon
         method, field = ("sendAnimation", "animation") if str(image).lower().endswith(".mp4") else ("sendPhoto", "photo")
         r = tg(method, {
             "chat_id": CHANNEL_ID, field: image, "caption": text,
-            "parse_mode": "HTML", "reply_markup": keyboard,
+            "parse_mode": "HTML",
         })
         if r and r.get("ok"):
             return True
     # resim yoksa ya da Telegram resmi alamadıysa düz mesaj
     r = tg("sendMessage", {
         "chat_id": CHANNEL_ID, "text": text, "parse_mode": "HTML",
-        "reply_markup": keyboard, "disable_web_page_preview": True,
+        "disable_web_page_preview": True,
     })
     return bool(r and r.get("ok"))
 
