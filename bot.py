@@ -125,6 +125,8 @@ def to_ton(value):
 
 
 def fmt_ton(v):
+    if float(v).is_integer():
+        return str(int(v))
     s = f"{v:.4f}".rstrip("0").rstrip(".")
     if "." not in s:
         s += ".00"
@@ -180,9 +182,10 @@ def tg(method, payload):
 def load_state():
     try:
         with open(STATE_FILE) as f:
-            return {"seen": json.load(f).get("seen", [])}
+            d = json.load(f)
+            return {"seen": d.get("seen", []), "day": d.get("day", {})}
     except (FileNotFoundError, json.JSONDecodeError):
-        return {"seen": []}
+        return {"seen": [], "day": {}}
 
 
 def save_state(state):
@@ -212,22 +215,69 @@ def item_link(ev):
     return ITEM_URL.replace("{id}", num).replace("{productId}", pid)
 
 
-def build_message(ev):
+# Oyuna göre başlık rengi
+GAME_ICONS = {"2": "🟣", "16": "🟦"}
+_usd = {"rate": None, "at": 0}
+
+
+def ton_usd():
+    """TON/USD kuru, 5 dakikada bir yenilenir. Alınamazsa None."""
+    if time.time() - _usd["at"] > 300:
+        _usd["at"] = time.time()
+        try:
+            d = http_json("https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd")
+            _usd["rate"] = float(d["the-open-network"]["usd"])
+        except Exception:
+            pass
+    return _usd["rate"]
+
+
+def hashtag(text):
+    tag = "".join(ch for ch in str(text) if ch.isalnum())
+    return "#" + tag if tag else ""
+
+
+def count_sale(state, ev, price):
+    """Bugünkü (UTC) satış sayısı ve hacmini oyun bazında tutar."""
+    today = time.strftime("%Y-%m-%d", time.gmtime())
+    if state["day"].get("date") != today:
+        state["day"] = {"date": today}
+    app = str(pick(ev, "app_id"))
+    n, vol = state["day"].get(app, [0, 0.0])
+    state["day"][app] = [n + 1, vol + price]
+    return n + 1, vol + price
+
+
+def build_message(ev, stats=None):
+    app = str(pick(ev, "app_id"))
     name = str(pick(ev, "name") or "Item")
     serial = pick(ev, "serial")
     collection = pick(ev, "collection")
     price = to_ton(pick(ev, "price"))
+    game = GAMES.get(app, "Not Games")
+
+    lines = [f"{GAME_ICONS.get(app, '🎮')} <b>{escape(game.upper())}</b>  ·  SOLD", ""]
     title = f"<b>{escape(name)}</b>" + (f"  <code>#{escape(str(serial))}</code>" if serial is not None else "")
-    game = GAMES.get(str(pick(ev, "app_id")), "Not Games")
-    lines = [f"✅ <b>ITEM SOLD</b>  ·  <i>{escape(game)}</i>", "", f"<blockquote>{title}"]
+    lines.append(title)
     if collection and str(collection).lower() != name.lower():
-        lines[-1] += f"\n🗂 {escape(str(collection))}"
-    lines[-1] += "</blockquote>"
-    lines.append(f"💰 <b>{fmt_ton(price)} TON</b>")
+        lines.append(f"🗂 <i>{escape(str(collection))}</i>")
+    lines.append("━━━━━━━━━━━━")
+
+    price_line = f"💎 <b>{fmt_ton(price)} TON</b>"
+    rate = ton_usd()
+    if rate:
+        price_line += f"  <i>≈ ${price * rate:,.2f}</i>"
+    lines.append(price_line)
     if price >= 100:
-        lines.append("🐳 <i>Whale sale</i>")
+        lines.append("🐳 <b>Whale sale!</b>")
     elif price >= 10:
-        lines.append("🔥 <i>Big sale</i>")
+        lines.append("🔥 <b>Big sale!</b>")
+    if stats:
+        n, vol = stats
+        lines.append(f"📊 <i>Sale #{n} today · {fmt_ton(vol)} TON volume</i>")
+
+    tags = " ".join(t for t in (hashtag(game), hashtag(collection or name)) if t)
+    lines += ["", tags]
     return "\n".join(lines)
 
 
@@ -288,7 +338,8 @@ def process(events, state, first_run):
             continue
         if first_run and not POST_OLD:
             continue
-        if post(ev, build_message(ev)):
+        stats = count_sale(state, ev, now)
+        if post(ev, build_message(ev, stats)):
             time.sleep(1.5)  # kanal başına Telegram limiti ~20 mesaj/dk
 
 
