@@ -16,7 +16,7 @@ Ortam değişkenleri (token'ı ASLA koda yazma):
     CHANNEL_ID     @kanal_adi veya -100... sayısal id     (zorunlu)
     POLL_SECONDS   kaç saniyede bir kontrol (varsayılan 20)
     FEED_LIMIT     her seferde kaç satış çekilir (varsayılan 20)
-    APP_ID         hangi oyunların satışları, virgülle: "16" ya da "16,4" (boş = hepsi)
+    APP_ID         hangi oyunların satışları, virgülle: varsayılan "16,2" = Pixel World + VOID (boş = hepsi)
     MIN_PRICE_TON  bu fiyatın altındaki satışları atla (varsayılan 0)
     STATE_FILE     görülen satışların tutulduğu dosya (varsayılan state.json)
     POST_OLD       1 ise ilk açılışta akıştaki eski satışları da gönderir
@@ -42,9 +42,13 @@ BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
 CHANNEL_ID = os.environ.get("CHANNEL_ID", "-1004408043162")
 POLL_SECONDS = int(os.environ.get("POLL_SECONDS", "20"))
 FEED_LIMIT = int(os.environ.get("FEED_LIMIT", "20"))
-APP_IDS = {a.strip() for a in os.environ.get("APP_ID", "16").split(",") if a.strip()}  # boş = tüm oyunlar
+APP_IDS = {a.strip() for a in os.environ.get("APP_ID", "16,2").split(",") if a.strip()}  # boş = tüm oyunlar
 # px.market oyun numaraları -> mesajda görünen ad
-GAMES = {"4": "Notcoin", "7": "Glance", "9": "Hitoku", "16": "Pixel World"}
+GAMES = {
+    "2": "VOID", "3": "Not Pixel", "4": "Notcoin", "5": "Disk Trickster", "6": "Lost Dogs",
+    "7": "Glance", "8": "Runners", "9": "Hitoku", "11": "TON Battleground", "13": "KokoronoKI",
+    "15": "TON Poker", "16": "Pixel World",
+}
 MIN_PRICE_TON = float(os.environ.get("MIN_PRICE_TON", "0"))
 ITEM_URL = os.environ.get("ITEM_URL", SITE)  # {id} = productId içindeki sayı, örn. https://px.market/item/{id}
 STATE_FILE = os.environ.get("STATE_FILE", "state.json")
