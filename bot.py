@@ -16,7 +16,7 @@ Ortam değişkenleri (token'ı ASLA koda yazma):
     CHANNEL_ID     @kanal_adi veya -100... sayısal id     (zorunlu)
     POLL_SECONDS   kaç saniyede bir kontrol (varsayılan 20)
     FEED_LIMIT     her seferde kaç satış çekilir (varsayılan 20)
-    APP_ID         hangi oyunların satışları, virgülle: varsayılan "16,2" = Pixel World + VOID (boş = hepsi)
+    APP_ID         hangi oyunların satışları, virgülle: varsayılan "16,2,7" = Pixel World + VOID + Glance (boş = hepsi)
     MIN_PRICE_TON  bu fiyatın altındaki satışları atla (varsayılan 0)
     STATE_FILE     görülen satışların tutulduğu dosya (varsayılan state.json)
     POST_OLD       1 ise ilk açılışta akıştaki eski satışları da gönderir
@@ -42,10 +42,10 @@ BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
 CHANNEL_ID = os.environ.get("CHANNEL_ID", "-1004408043162")
 POLL_SECONDS = int(os.environ.get("POLL_SECONDS", "20"))
 FEED_LIMIT = int(os.environ.get("FEED_LIMIT", "20"))
-APP_IDS = {a.strip() for a in os.environ.get("APP_ID", "16,2").split(",") if a.strip()}  # boş = tüm oyunlar
+APP_IDS = {a.strip() for a in os.environ.get("APP_ID", "16,2,7").split(",") if a.strip()}  # boş = tüm oyunlar
 # Forum grubunda her oyunun gittiği konu (topic): oyun no -> konu no.
 # Konu no = konunun linkindeki son sayı (t.me/c/4408043162/<konu no>). Listede yoksa General'e gider.
-TOPICS = {"16": "5", "2": "8"}  # Pixel world LIVE, VOID LIVE
+TOPICS = {"16": "5", "2": "8", "7": "19"}  # Pixel world LIVE, VOID LIVE, Glance
 for _pair in os.environ.get("TOPICS", "").split(","):  # örn. TOPICS=16:3,2:5
     if ":" in _pair:
         _app, _topic = _pair.split(":", 1)
@@ -216,7 +216,7 @@ def item_link(ev):
 
 
 # Oyuna göre başlık rengi
-GAME_ICONS = {"2": "🟣", "16": "🟦"}
+GAME_ICONS = {"2": "🟣", "7": "⚫", "16": "🟦"}
 _usd = {"rate": None, "at": 0}
 
 

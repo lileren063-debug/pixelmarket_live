@@ -23,7 +23,7 @@ Bot sürekli açık kalmalı, bu yüzden bir sunucuya koy:
 Variables kısmına ekle:
 - `BOT_TOKEN` = BotFather'ın verdiği token
 - `CHANNEL_ID` = `@kanal_adin`
-- `APP_ID` (isteğe bağlı): varsayılan `16,2` = Pixel World + VOID. Boş bırakırsan (`APP_ID=`) tüm oyunlar
+- `APP_ID` (isteğe bağlı): varsayılan `16,2,7` = Pixel World + VOID + Glance. Boş bırakırsan (`APP_ID=`) tüm oyunlar
 
 Start command: `python bot.py`
 
@@ -36,7 +36,7 @@ Start command: `python bot.py`
 |---|---|---|
 | `POLL_SECONDS` | kaç saniyede bir kontrol | 20 |
 | `MIN_PRICE_TON` | bu fiyatın altındaki satışları gösterme | 0 |
-| `APP_ID` | sadece bu oyun (16 = Pixel World) | 16,2 |
+| `APP_ID` | sadece bu oyun (16 = Pixel World) | 16,2,7 |
 | `POST_OLD` | 1 ise açılışta eski satışları da atar | kapalı |
 
 ## Not
