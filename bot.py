@@ -41,7 +41,7 @@ SITE = "https://px.market"
 NANO = 1_000_000_000
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
-CHANNEL_ID = os.environ.get("CHANNEL_ID", "")
+CHANNEL_ID = os.environ.get("CHANNEL_ID", "-1004408043162")
 POLL_SECONDS = int(os.environ.get("POLL_SECONDS", "20"))
 FEED_LIMIT = int(os.environ.get("FEED_LIMIT", "20"))
 APP_ID = os.environ.get("APP_ID", "16").strip()  # 16 = Pixel World, boş = tüm oyunlar
