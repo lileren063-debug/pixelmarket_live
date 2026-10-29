@@ -43,6 +43,13 @@ CHANNEL_ID = os.environ.get("CHANNEL_ID", "-1004408043162")
 POLL_SECONDS = int(os.environ.get("POLL_SECONDS", "20"))
 FEED_LIMIT = int(os.environ.get("FEED_LIMIT", "20"))
 APP_IDS = {a.strip() for a in os.environ.get("APP_ID", "16,2").split(",") if a.strip()}  # boş = tüm oyunlar
+# Forum grubunda her oyunun gittiği konu (topic): oyun no -> konu no.
+# Konu no = konunun linkindeki son sayı (t.me/c/4408043162/<konu no>). Listede yoksa General'e gider.
+TOPICS = {"16": None, "2": None}
+for _pair in os.environ.get("TOPICS", "").split(","):  # örn. TOPICS=16:3,2:5
+    if ":" in _pair:
+        _app, _topic = _pair.split(":", 1)
+        TOPICS[_app.strip()] = _topic.strip()
 # px.market oyun numaraları -> mesajda görünen ad
 GAMES = {
     "2": "VOID", "3": "Not Pixel", "4": "Notcoin", "5": "Disk Trickster", "6": "Lost Dogs",
@@ -226,23 +233,27 @@ def build_message(ev):
 
 def post(ev, text):
     image = pick(ev, "image")
+    target = {"chat_id": CHANNEL_ID}
+    topic = TOPICS.get(str(pick(ev, "app_id")))
+    if topic:
+        target["message_thread_id"] = int(topic)
     if DRY_RUN:
         print("-" * 40)
-        print(f"[resim] {image}")
+        print(f"[hedef] {target}  [resim] {image}")
         print(text, flush=True)
         return True
     if image:
         # bazı eşyaların görseli .mp4 animasyon
         method, field = ("sendAnimation", "animation") if str(image).lower().endswith(".mp4") else ("sendPhoto", "photo")
         r = tg(method, {
-            "chat_id": CHANNEL_ID, field: image, "caption": text,
+            **target, field: image, "caption": text,
             "parse_mode": "HTML",
         })
         if r and r.get("ok"):
             return True
     # resim yoksa ya da Telegram resmi alamadıysa düz mesaj
     r = tg("sendMessage", {
-        "chat_id": CHANNEL_ID, "text": text, "parse_mode": "HTML",
+        **target, "text": text, "parse_mode": "HTML",
         "disable_web_page_preview": True,
     })
     return bool(r and r.get("ok"))
