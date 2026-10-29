@@ -237,18 +237,7 @@ def hashtag(text):
     return "#" + tag if tag else ""
 
 
-def count_sale(state, ev, price):
-    """Bugünkü (UTC) satış sayısı ve hacmini oyun bazında tutar."""
-    today = time.strftime("%Y-%m-%d", time.gmtime())
-    if state["day"].get("date") != today:
-        state["day"] = {"date": today}
-    app = str(pick(ev, "app_id"))
-    n, vol = state["day"].get(app, [0, 0.0])
-    state["day"][app] = [n + 1, vol + price]
-    return n + 1, vol + price
-
-
-def build_message(ev, stats=None):
+def build_message(ev):
     app = str(pick(ev, "app_id"))
     name = str(pick(ev, "name") or "Item")
     serial = pick(ev, "serial")
@@ -272,9 +261,6 @@ def build_message(ev, stats=None):
         lines.append("🐳 <b>Whale sale!</b>")
     elif price >= 10:
         lines.append("🔥 <b>Big sale!</b>")
-    if stats:
-        n, vol = stats
-        lines.append(f"📊 <i>Sale #{n} today · {fmt_ton(vol)} TON volume</i>")
 
     tags = " ".join(t for t in (hashtag(game), hashtag(collection or name)) if t)
     lines += ["", tags]
@@ -338,8 +324,7 @@ def process(events, state, first_run):
             continue
         if first_run and not POST_OLD:
             continue
-        stats = count_sale(state, ev, now)
-        if post(ev, build_message(ev, stats)):
+        if post(ev, build_message(ev)):
             time.sleep(1.5)  # kanal başına Telegram limiti ~20 mesaj/dk
 
 
