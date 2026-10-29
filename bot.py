@@ -44,7 +44,7 @@ POLL_SECONDS = int(os.environ.get("POLL_SECONDS", "20"))
 FEED_LIMIT = int(os.environ.get("FEED_LIMIT", "20"))
 APP_IDS = {a.strip() for a in os.environ.get("APP_ID", "16").split(",") if a.strip()}  # boş = tüm oyunlar
 # px.market oyun numaraları -> mesajda görünen ad
-GAMES = {"16": "Pixel World"}
+GAMES = {"4": "Notcoin", "7": "Glance", "9": "Hitoku", "16": "Pixel World"}
 MIN_PRICE_TON = float(os.environ.get("MIN_PRICE_TON", "0"))
 ITEM_URL = os.environ.get("ITEM_URL", SITE)  # {id} = productId içindeki sayı, örn. https://px.market/item/{id}
 STATE_FILE = os.environ.get("STATE_FILE", "state.json")
