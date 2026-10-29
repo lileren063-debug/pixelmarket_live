@@ -16,7 +16,7 @@ Ortam değişkenleri (token'ı ASLA koda yazma):
     CHANNEL_ID     @kanal_adi veya -100... sayısal id     (zorunlu)
     POLL_SECONDS   kaç saniyede bir kontrol (varsayılan 20)
     FEED_LIMIT     her seferde kaç satış çekilir (varsayılan 20)
-    APP_ID         sadece bu oyunun satışları, 16 = Pixel World (varsayılan; boş = hepsi)
+    APP_ID         hangi oyunların satışları, virgülle: "16" ya da "16,4" (boş = hepsi)
     MIN_PRICE_TON  bu fiyatın altındaki satışları atla (varsayılan 0)
     STATE_FILE     görülen satışların tutulduğu dosya (varsayılan state.json)
     POST_OLD       1 ise ilk açılışta akıştaki eski satışları da gönderir
@@ -42,7 +42,9 @@ BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
 CHANNEL_ID = os.environ.get("CHANNEL_ID", "-1004408043162")
 POLL_SECONDS = int(os.environ.get("POLL_SECONDS", "20"))
 FEED_LIMIT = int(os.environ.get("FEED_LIMIT", "20"))
-APP_ID = os.environ.get("APP_ID", "16").strip()  # 16 = Pixel World, boş = tüm oyunlar
+APP_IDS = {a.strip() for a in os.environ.get("APP_ID", "16").split(",") if a.strip()}  # boş = tüm oyunlar
+# px.market oyun numaraları -> mesajda görünen ad
+GAMES = {"16": "Pixel World"}
 MIN_PRICE_TON = float(os.environ.get("MIN_PRICE_TON", "0"))
 ITEM_URL = os.environ.get("ITEM_URL", SITE)  # {id} = productId içindeki sayı, örn. https://px.market/item/{id}
 STATE_FILE = os.environ.get("STATE_FILE", "state.json")
@@ -205,7 +207,8 @@ def build_message(ev):
     collection = pick(ev, "collection")
     price = to_ton(pick(ev, "price"))
     title = f"<b>{escape(name)}</b>" + (f"  <code>#{escape(str(serial))}</code>" if serial is not None else "")
-    lines = ["✅ <b>ITEM SOLD</b>  ·  <i>Pixel World</i>", "", f"<blockquote>{title}"]
+    game = GAMES.get(str(pick(ev, "app_id")), "Not Games")
+    lines = [f"✅ <b>ITEM SOLD</b>  ·  <i>{escape(game)}</i>", "", f"<blockquote>{title}"]
     if collection and str(collection).lower() != name.lower():
         lines[-1] += f"\n🗂 {escape(str(collection))}"
     lines[-1] += "</blockquote>"
@@ -254,7 +257,7 @@ def process(events, state, first_run):
         seen.add(key)
         state["seen"].append(key)
 
-        if APP_ID and str(pick(ev, "app_id") or "") not in ("", APP_ID):
+        if APP_IDS and str(pick(ev, "app_id") or "") not in APP_IDS:
             continue
         t = str(pick(ev, "type"))
         if t not in TYPES_SEEN:
