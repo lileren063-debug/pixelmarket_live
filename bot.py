@@ -39,13 +39,13 @@ SITE = "https://px.market"
 NANO = 1_000_000_000
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
-CHANNEL_ID = os.environ.get("CHANNEL_ID", "-1004408043162")
+CHANNEL_ID = os.environ.get("CHANNEL_ID", "@pixelmarket_sale")
 POLL_SECONDS = int(os.environ.get("POLL_SECONDS", "20"))
 FEED_LIMIT = int(os.environ.get("FEED_LIMIT", "20"))
 APP_IDS = {a.strip() for a in os.environ.get("APP_ID", "16,2,7").split(",") if a.strip()}  # boş = tüm oyunlar
 # Forum grubunda her oyunun gittiği konu (topic): oyun no -> konu no.
 # Konu no = konunun linkindeki son sayı (t.me/c/4408043162/<konu no>). Listede yoksa General'e gider.
-TOPICS = {"16": "5", "2": "8", "7": "19"}  # Pixel world LIVE, VOID LIVE, Glance
+TOPICS = {}  # hepsi aynı yere (konu yok)
 for _pair in os.environ.get("TOPICS", "").split(","):  # örn. TOPICS=16:3,2:5
     if ":" in _pair:
         _app, _topic = _pair.split(":", 1)
